@@ -51,7 +51,7 @@ import {
 import { usePhotoGallery, UserPhoto } from '@/composables/usePhotoGallery';
 import { defineComponent} from 'vue';
 export default defineComponent({
-  name: 'Tab2',
+  name: 'Tab2Page',
   components: {
     IonHeader,
     IonFab,
