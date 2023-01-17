@@ -5,6 +5,22 @@ import { Preferences } from '@capacitor/preferences';
 
 export const usePhotoGallery = () => {
     const photos = ref<UserPhoto[]>([]);
+    const PHOTO_STORAGE = 'photos';
+
+    const loadSaved = async () => {
+      const photoList = await Preferences.get({ key: PHOTO_STORAGE });
+      const photosInPreferences = photoList.value ? JSON.parse(photoList.value) : [];
+    
+      for (const photo of photosInPreferences) {
+        const file = await Filesystem.readFile({
+          path: photo.filepath,
+          directory: Directory.Data,
+        });
+        photo.webviewPath = `data:image/jpeg;base64,${file.data}`;
+      }
+    
+      photos.value = photosInPreferences;
+    };
 
     const convertBlobToBase64 = (blob: Blob) =>
       new Promise((resolve, reject) => {
@@ -47,6 +63,17 @@ export const usePhotoGallery = () => {
 
       photos.value = [savedFileImage, ...photos.value];
     };
+
+    const cachePhotos = () => {
+      Preferences.set({
+        key: PHOTO_STORAGE,
+        value: JSON.stringify(photos.value),
+      });
+    };
+
+    onMounted(loadSaved);
+
+    watch(photos, cachePhotos);
   
     return {
       photos,
